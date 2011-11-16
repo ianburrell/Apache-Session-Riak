@@ -4,6 +4,32 @@ use 5.006;
 use strict;
 use warnings;
 
+use base qw(Apache::Session);
+
+use Apache::Session::Store::Riak;
+use Apache::Session::Generate::MD5;
+use Apache::Session::Lock::Null;
+use Apache::Session::Serialize::Storable;
+
+use vars qw($VERSION);
+$VERSION = '0.1';
+
+sub populate
+{
+    my $self = shift;
+
+    $self->{object_store} = Apache::Session::Store::Riak->new($self;
+    $self->{lock_manager} = Apache::Session::Lock::Null->new($self);
+    $self->{generate}     = \&Apache::Session::Generate::MD5::generate;
+    $self->{validate}     = \&Apache::Session::Generate::MD5::validate;
+    $self->{serialize}    = \&Apache::Session::Serialize::Storable::serialize;
+    $self->{unserialize}  = \&Apache::Session::Serialize::Storable::unserialize;
+
+    return $self;
+}
+
+1;
+
 =head1 NAME
 
 Apache::Session::Riak - The great new Apache::Session::Riak!
